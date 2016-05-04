@@ -95,6 +95,9 @@ public class Parser {
     Pa<String> pkw_rowtype = c.forkw("rowtype");
     Pa<String> pkw_sql = c.forkw("sql");
     Pa<String> pkw_create = c.forkw("create");
+    Pa<String> pkw_commit = c.forkw("commit");
+    Pa<String> pkw_wait = c.forkw("wait");
+    Pa<String> pkw_nowait = c.forkw("nowait");
     // do not care about the string, what operators are there else?
     Pa pkw_multiset_union_all = c.seq2(c.forkw2("multiset", "union"), c.forkw("all"));
 
@@ -1874,10 +1877,10 @@ public class Parser {
                 // that with is not a procedure or variable name 
                 case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
                     return paSQLStatement(s);
-
                 case "lock": /*lock table*/
-
                     return paLockTableStatement(s);
+                case "commit":
+                	return paCommitStatement(s);
             }
         }
         return paAssignOrCallStatement(s);
@@ -2471,6 +2474,43 @@ public class Parser {
         return new Res<Ast.Statement>(new Ast.LockTableStatement(r1.v, mode, r4.v), r4.next);
     }
 
+    public Res<Ast.Statement> paCommitStatement(Seq s) {
+    	Res<String> r = c.or2(c.forkw2("commit", "work"), pkw_commit).pa(s);
+    	if (r == null) {
+    		return null;
+    	}
+    	Res<String> r1 = c.forkw("force").pa(r.next);
+    	if (r1 != null) {
+    		Res<Ast.Expression> r2 = paAtomExpr(r1.next);
+    		Res<T2<String, Integer>> r3 = c.seq2(c.pComma, pNatural).pa(r2.next);
+    		if (r3 == null) {
+    			return new Res<Ast.Statement>(new Ast.CommitStatement(null, null, null, r2.v, null), r2.next);
+    		} else {
+    			return new Res<Ast.Statement>(new Ast.CommitStatement(null, null, null, r2.v, r3.v.f2), r3.next);
+    		}
+    	}
+    	Res<String> r4 = c.forkw("comment").pa(r.next);
+    	Seq next = r.next;
+    	Res<Ast.Expression> r5 = null;
+    	if (r4 != null) {
+    		r5 = paAtomExpr(r4.next);
+    		next = r5.next;
+    	}
+    	Res<String> r6 = c.forkw("write").pa(next);
+    	if (r6 != null) {
+    		next = r6.next;
+    		Res<String> r7 = c.or2(c.forkw("immediate"), c.forkw("batch")).pa(next);
+    		if (r7 != null) {
+    			next = r7.next;
+    		}
+    		Res<String> r8 = c.or2(pkw_wait, pkw_nowait).pa(next);
+    		if (r8 != null) {
+    			next = r8.next;
+    		}
+    		return new Res<Ast.Statement>(new Ast.CommitStatement(r5 == null ? null : r5.v, r7 == null ? null : r7.v, r8 == null ? null : r8.v, null, null), next);
+    	}
+    	return new Res<Ast.Statement>(new Ast.CommitStatement(null, null, null, null, null), next);
+    }
     /*
      and pProcedureDefinitionOrDeclaration s =
      bind(pProcedureHeading,

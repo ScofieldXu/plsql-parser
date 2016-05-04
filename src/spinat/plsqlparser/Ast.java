@@ -1350,6 +1350,27 @@ public class Ast {
             this.isnowait = isnowait;
         }
     }
+    
+    public static class CommitStatement extends Statement {
+    	public final Ast.Expression comment;
+    	public final String wait_nowait;
+    	public final String immediate_batch;
+    	public final Ast.Expression force;
+    	public final Integer force_integer;
+    	
+    	public CommitStatement(
+    			Ast.Expression comment, 
+    			String wait_nowait,
+    			String immediate_batch,
+    			Ast.Expression force, 
+    			Integer force_integer) {
+    		this.comment = comment;
+    		this.wait_nowait = wait_nowait;
+    		this.immediate_batch = immediate_batch;
+    		this.force = force;
+    		this.force_integer= force_integer;
+    	}
+    }
 
     public static class PackageBody {
 
