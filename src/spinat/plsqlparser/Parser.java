@@ -2489,27 +2489,15 @@ public class Parser {
     			return new Res<Ast.Statement>(new Ast.CommitStatement(null, null, null, r2.v, r3.v.f2), r3.next);
     		}
     	}
-    	Res<String> r4 = c.forkw("comment").pa(r.next);
-    	Seq next = r.next;
-    	Res<Ast.Expression> r5 = null;
-    	if (r4 != null) {
-    		r5 = paAtomExpr(r4.next);
-    		next = r5.next;
-    	}
-    	Res<String> r6 = c.forkw("write").pa(next);
-    	if (r6 != null) {
-    		next = r6.next;
-    		Res<String> r7 = c.or2(c.forkw("immediate"), c.forkw("batch")).pa(next);
-    		if (r7 != null) {
-    			next = r7.next;
-    		}
-    		Res<String> r8 = c.or2(pkw_wait, pkw_nowait).pa(next);
-    		if (r8 != null) {
-    			next = r8.next;
-    		}
-    		return new Res<Ast.Statement>(new Ast.CommitStatement(r5 == null ? null : r5.v, r7 == null ? null : r7.v, r8 == null ? null : r8.v, null, null), next);
-    	}
-    	return new Res<Ast.Statement>(new Ast.CommitStatement(null, null, null, null, null), next);
+    	Res<T2<String, Expression>> r4 = c.opt(c.seq2(c.forkw("comment"), pExpr)).pa(r.next);
+    	Res<T3<String,String,String>> r6 = c.opt(
+    			c.seq3( c.forkw("write"), 
+    					c.opt(c.or2(c.forkw("immediate"), c.forkw("batch"))), 
+    					c.opt(c.or2(pkw_wait, pkw_nowait)))
+    			).pa(r4.next);
+    	return new Res<Ast.Statement>(
+    			new Ast.CommitStatement(r4.v == null ? null : r4.v.f2, r6.v == null ? null : r6.v.f3, r6.v == null ? null : r6.v.f2, null, null), 
+    			r6.next);
     }
     /*
      and pProcedureDefinitionOrDeclaration s =
