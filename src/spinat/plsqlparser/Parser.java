@@ -2490,13 +2490,16 @@ public class Parser {
     		}
     	}
     	Res<T2<String, Expression>> r4 = c.opt(c.seq2(c.forkw("comment"), pExpr)).pa(r.next);
-    	Res<T3<String,String,String>> r6 = c.opt(
-    			c.seq3( c.forkw("write"), 
+    	Res<T4<String,String,String,String>> r6 = c.opt(
+    			c.seq4( c.forkw("write"), 
     					c.opt(c.or2(c.forkw("immediate"), c.forkw("batch"))), 
-    					c.opt(c.or2(pkw_wait, pkw_nowait)))
+    					c.opt(c.or2(pkw_wait, pkw_nowait)),
+    					c.opt(c.or2(c.forkw("immediate"), c.forkw("batch"))))
     			).pa(r4.next);
+    	String wait_nowait = r6.v == null ? null : r6.v.f3;
+    	String immediate_batch = r6.v == null ? null : (r6.v.f2 == null ? null : r6.v.f4);
     	return new Res<Ast.Statement>(
-    			new Ast.CommitStatement(r4.v == null ? null : r4.v.f2, r6.v == null ? null : r6.v.f3, r6.v == null ? null : r6.v.f2, null, null), 
+    			new Ast.CommitStatement(r4.v == null ? null : r4.v.f2, wait_nowait, immediate_batch, null, null), 
     			r6.next);
     }
     /*

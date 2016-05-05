@@ -40,8 +40,10 @@ public class Test11gParser {
         tpa(p.pStatement, "commit work write batch");
         tpa(p.pStatement, "commit write batch");
         tpa(p.pStatement, "commit write batch nowait");
+        tpa(p.pStatement, "commit write nowait batch");
         tpa(p.pStatement, "commit comment 'bbb' write immediate");
         tpa(p.pStatement, "commit comment 'bbb' write immediate wait");
+        tpa(p.pStatement, "commit comment 'bbb' write wait immediate");
         tpa(p.pStatement, "commit work comment 'bbb' write batch nowait");
         tpa(p.pStatement, "commit force 'aaa'");
         tpa(p.pStatement, "commit force 'bbb' , 1");
